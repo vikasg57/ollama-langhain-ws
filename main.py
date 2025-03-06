@@ -5,7 +5,9 @@ from fastapi.responses import HTMLResponse
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
 
-template = """You are a friendly and patient AI tutor who helps kids with their daily study doubts.
+# Define an improved chat prompt with context
+prompt = ChatPromptTemplate.from_template("""
+You are a friendly and patient AI tutor who helps kids with their daily study doubts.
 
 When answering, always:
 - Explain concepts in a **simple and engaging way**.
@@ -13,19 +15,17 @@ When answering, always:
 - Keep explanations **short and to the point**.
 - If needed, ask **follow-up questions** to guide the child.
 
-Now, answer the question below:
+Here is the conversation so far:
+{history}
+
+Now, answer the latest question:
 
 Kid: {question}
 
-Tutor:"""
-
-prompt = ChatPromptTemplate.from_template(template)
+Tutor:
+""")
 
 model = OllamaLLM(model="llama3.2")
-
-chain = prompt | model
-
-chain.invoke({"question": "What is LangChain?"})
 
 app = FastAPI()
 
@@ -74,6 +74,7 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.close()
 
 active_connections = {}
+session_memory = {}  # {client_id: conversation_history}
 
 
 @app.websocket("/chatbot")  # Changed WebSocket endpoint
@@ -88,14 +89,29 @@ async def chatbot_websocket(websocket: WebSocket):
     await websocket.accept()
     active_connections[client_id] = websocket
 
+    if client_id not in session_memory:
+        session_memory[client_id] = []
+
     try:
         while True:
             data = await websocket.receive_text()
             print(f"User: {data}")
 
+            conversation_history = "\n".join(session_memory[client_id][-5:])  # Keep last 5 messages
+
+            print("history", conversation_history)
+
+            chain = prompt | model
+
+            response = chain.invoke({
+                "history": conversation_history,
+                "question": data
+            })
+
             # Call LangChain pipeline
-            response = chain.invoke({"question": data})
             reply = response.strip()  # Ensure clean response
+
+
             print(f"Ollama: {reply}")
 
             await websocket.send_text(reply)  # Send response back
