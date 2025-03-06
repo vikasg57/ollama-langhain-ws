@@ -1,0 +1,58 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+
+# IDE/editor-specific files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Logs and database files
+*.log
+*.sqlite3
+*.db
+
+# Cache and temporary files
+*.swp
+*.swo
+*.bak
+.DS_Store
+*.~undo-tree~
+
+# Pip and poetry
+pip-log.txt
+pip-delete-this-directory.txt
+poetry.lock
+
+# Environment variables and credentials
+.env
+*.env
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Pytest and coverage
+htmlcov/
+.coverage
+*.cover
+*.py,cover
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.pytest_cache/
+tox/
+
+# MyPy
+.mypy_cache/
+dmypy.json
+.pyre/
+
+# FastAPI-specific
+instance/
