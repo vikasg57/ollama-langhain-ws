@@ -127,5 +127,5 @@ async def chatbot_websocket(websocket: WebSocket):
 
 @app.get("/chat")
 def get():
-    with open("chat.html", "r") as file:
+    with open("templates/chat.html", "r") as file:
         return HTMLResponse(content=file.read())
