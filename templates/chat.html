@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <style>
+        /* General Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: #f7f7f8;
+            color: #2d2d2d;
+            line-height: 1.6;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #202123;
+            color: white;
+            padding: 15px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .new-chat-btn {
+            background: #343541;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background: #40414f;
+        }
+
+        .new-chat-btn svg {
+            margin-right: 8px;
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #8e8ea0;
+            margin: 15px 0 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-history-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #ececf1;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-history-item:hover {
+            background: #343541;
+        }
+
+        .chat-history-item svg {
+            margin-right: 8px;
+            min-width: 16px;
+        }
+
+        .sidebar-footer {
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .user-menu:hover {
+            background: #343541;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: #a855f7;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e5e5e5;
+            background: white;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .model-selector {
+            display: flex;
+            align-items: center;
+            background: #f0f0f0;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .model-selector svg {
+            margin-right: 6px;
+        }
+
+        /* Chat Box */
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            background: white;
+        }
+
+        .message-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .message-wrapper {
+            display: flex;
+            margin-bottom: 24px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: #f0f0f0;
+            margin-right: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .user-avatar-chat {
+            background: #a855f7;
+            color: white;
+        }
+
+        .bot-avatar {
+            background: #10a37f;
+            color: white;
+        }
+
+        .message {
+            flex: 1;
+            font-size: 15px;
+            word-wrap: break-word;
+            line-height: 1.5;
+            padding-top: 4px;
+        }
+
+        .user-message-wrapper {
+            background: #f7f7f8;
+        }
+
+        .user-message-wrapper .message-container {
+            padding-top: 12px;
+            padding-bottom: 12px;
+        }
+
+        /* Chat Input */
+        .chat-input-container {
+            padding: 10px 20px 20px;
+            background: white;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .chat-input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .chat-input {
+            display: flex;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            padding: 8px;
+        }
+
+        .chat-input textarea {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            resize: none;
+            max-height: 200px;
+            min-height: 24px;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+
+        .chat-input button {
+            background: #10a37f;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .chat-input button:hover {
+            background: #0e8e6d;
+        }
+
+        .chat-input button:disabled {
+            background: #e5e5e5;
+            cursor: not-allowed;
+        }
+
+        .hints {
+            margin-top: 10px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <button class="new-chat-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4V20M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            New chat
+        </button>
+
+        <div class="sidebar-title">Recent chats</div>
+
+        <div class="history-list">
+            <div class="chat-history-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 10.5H16M8 14.5H13M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Project brainstorming
+            </div>
+            <div class="chat-history-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 10.5H16M8 14.5H13M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Code review help
+            </div>
+            <div class="chat-history-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 10.5H16M8 14.5H13M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Travel recommendations
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-menu">
+                <div class="user-avatar">U</div>
+                <div>User</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="chat-header">
+            <div class="header-title">Chat</div>
+            <div class="model-selector">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3V4M12 20V21M4 12H3M21 12H20M18.364 18.364L17.657 17.657M18.364 5.636L17.657 6.343M5.636 18.364L6.343 17.657M5.636 5.636L6.343 6.343M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Assistant
+            </div>
+        </div>
+
+        <div class="chat-box" id="messages">
+            <!-- Bot Welcome Message -->
+            <div class="message-wrapper">
+                <div class="avatar bot-avatar">A</div>
+                <div class="message">
+                    Hello! I'm your AI assistant. How can I help you today?
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <div class="chat-input">
+                    <textarea id="messageText" placeholder="Message the assistant..." rows="1"></textarea>
+                    <button id="sendButton">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="hints">Press Enter to send, Shift+Enter for a new line</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ws = new WebSocket("ws://localhost:8000/chatbot");
+            const messageInput = document.getElementById("messageText");
+            const sendButton = document.getElementById("sendButton");
+            const messagesContainer = document.getElementById("messages");
+
+            // Auto-resize textarea based on content
+            messageInput.addEventListener("input", function() {
+                this.style.height = "auto";
+                this.style.height = (this.scrollHeight) + "px";
+            });
+
+            ws.onmessage = function (event) {
+                appendMessage("bot", event.data);
+            };
+
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === "") return;
+
+                appendMessage("user", message);
+                ws.send(message);
+                messageInput.value = "";
+                messageInput.style.height = "auto";
+                // Reset button state
+                sendButton.disabled = true;
+                setTimeout(() => sendButton.disabled = false, 100);
+            }
+
+            function appendMessage(sender, message) {
+                // Create wrapper elements
+                const wrapperDiv = document.createElement("div");
+                wrapperDiv.classList.add("message-wrapper");
+
+                if (sender === "user") {
+                    // Add background for user messages
+                    const userBackgroundDiv = document.createElement("div");
+                    userBackgroundDiv.classList.add("user-message-wrapper");
+                    const userContainerDiv = document.createElement("div");
+                    userContainerDiv.classList.add("message-container");
+
+                    const userWrapperDiv = document.createElement("div");
+                    userWrapperDiv.classList.add("message-wrapper");
+
+                    // Create avatar
+                    const avatarDiv = document.createElement("div");
+                    avatarDiv.classList.add("avatar", "user-avatar-chat");
+                    avatarDiv.textContent = "U";
+
+                    // Create message
+                    const msgDiv = document.createElement("div");
+                    msgDiv.classList.add("message");
+                    msgDiv.textContent = message;
+
+                    // Assemble the structure
+                    userWrapperDiv.appendChild(avatarDiv);
+                    userWrapperDiv.appendChild(msgDiv);
+                    userContainerDiv.appendChild(userWrapperDiv);
+                    userBackgroundDiv.appendChild(userContainerDiv);
+
+                    messagesContainer.appendChild(userBackgroundDiv);
+                } else {
+                    // Create container for bot message
+                    const containerDiv = document.createElement("div");
+                    containerDiv.classList.add("message-container");
+
+                    // Create avatar
+                    const avatarDiv = document.createElement("div");
+                    avatarDiv.classList.add("avatar", "bot-avatar");
+                    avatarDiv.textContent = "A";
+
+                    // Create message
+                    const msgDiv = document.createElement("div");
+                    msgDiv.classList.add("message");
+                    msgDiv.textContent = message;
+
+                    // Assemble the structure
+                    wrapperDiv.appendChild(avatarDiv);
+                    wrapperDiv.appendChild(msgDiv);
+                    containerDiv.appendChild(wrapperDiv);
+
+                    messagesContainer.appendChild(containerDiv);
+                }
+
+                // Auto-scroll to latest message
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // Send message on button click
+            sendButton.addEventListener("click", sendMessage);
+
+            // Send message when pressing "Enter" (Shift+Enter for new line)
+            messageInput.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault(); // Prevent new line in input field
+                    sendMessage();
+                }
+            });
+
+            // Enable/disable send button based on input
+            messageInput.addEventListener("input", function() {
+                sendButton.disabled = messageInput.value.trim() === "";
+            });
+
+            // New chat button functionality
+            document.querySelector(".new-chat-btn").addEventListener("click", function() {
+                // Clear chat history
+                while (messagesContainer.children.length > 1) {
+                    messagesContainer.removeChild(messagesContainer.lastChild);
+                }
+                messageInput.value = "";
+                messageInput.focus();
+            });
+        });
+    </script>
+</body>
+</html>
